@@ -1,18 +1,16 @@
+const bcrypt = require('bcrypt');
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
+
 
 class User extends Model {}
 
 User.init(
     {
         id: {
-            // use the special Sequelize DataTypes objectprovide what type of data it is
             type: DataTypes.INTEGER,
-            // this is the equivalent of SQL's 'NOT NULL' option
             allowNull: false,
-            // instruct that this is the Primary Key
             primaryKey: true,
-            // turn on auto increment
             autoIncrement: true
         },
         username: {
@@ -36,6 +34,16 @@ User.init(
         }
     },
     {
+        hooks: {
+            async beforeCreate(newUserData) {
+                newUserData.password = await bcrypt.hash(userData.password, 10);
+                    return newUserData;
+            },
+            async beforeUpdate(updatedUserData) {
+                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+                    return updatedUserData
+            }
+        },
         sequelize,
         timestamps: false,
         freezeTableName: true,
